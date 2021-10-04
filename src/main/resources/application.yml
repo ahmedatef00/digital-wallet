@@ -1,0 +1,69 @@
+#H2 Database Config
+#  spring.h2.console.enabled=true
+#  spring.datasource.url=jdbc:h2:mem:testdb
+#  spring.datasource.driverClassName=org.h2.Driver
+#  spring.datasource.username=sa
+#  spring.datasource.password=password
+spring:
+  redis:
+    database: 6   # Redis database index (default 0)
+    host: 127.0.0.1 # Redis server address
+    port: 7481  # Redis Server Connection Port
+    password:    # Redis server connection password (default is empty)
+    timeout: 0  # Connection timeout time (milliseconds)
+    pool:
+      max-active: -1 # Maximum number of connections in connection pool (negative value indicates no restriction)
+      max-wait: -1  # Maximum blocking waiting time for connection pools (using negative values to indicate no restrictions)
+      max-idle: 8  # Maximum idle connection in connection pool
+      min-idle: 0  # Minimum idle connection in connection pool
+  redis2:
+    database: 6   # Redis database index (default 0)
+    host: 127.0.0.1  # Redis server address
+    port: 7480  # Redis Server Connection Port
+    password:    # Redis server connection password (default is empty)
+    timeout: 0  # Connection timeout time (milliseconds)
+
+  h2:
+  console:
+  enabled: true
+  path: /h2
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+devtools:
+  livereload:
+    port: 8010
+
+# Logging settings
+logging.level:
+  org:
+    hibernate:
+      SQL: debug
+      type.descriptor.sql.BasicBinder: trace
+    springframework:
+      cache: trace
+      web: debug
+
+
+security:
+  jwt_header: Authorization
+  expires_in: 300
+  secret: deathnote
+
+
+  #  spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+  #  server.port=7000
+  #  spring.devtools.livereload.port=8010
+  #  logging.level.org.springframework.web=debug
+  #  logging.level.org.hibernate=error
+
+#  spring.security.user.name=user
+#  spring.security.user.password=user
+#  spring.redis.database=0
+server:
+  port: 7000
+#  spring.redis1.database=1

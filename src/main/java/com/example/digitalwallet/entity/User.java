@@ -1,100 +1,127 @@
 package com.example.digitalwallet.entity;
 
-import com.example.digitalwallet.enums.Gender;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.digitalwallet.validation.annotation.NullOrNotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+
+import org.hibernate.annotations.NaturalId;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
+import javax.validation.constraints.NotBlank;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
+@Setter
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "USER_ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
+    @SequenceGenerator(name = "user_seq", allocationSize = 1)
+    private Long id;
 
-    @NotNull
-    @Size(min = 4, max = 255, message = "Minimum username length: 4 characters")
-    @Column(name = "username", unique = true, nullable = false)
+    @NaturalId
+    @Column(name = "EMAIL", unique = true)
+    @NotBlank(message = "User email cannot be null")
+    private String email;
+
+    @Column(name = "USERNAME", unique = true)
+    @NullOrNotBlank(message = "Username can not be blank")
     private String username;
 
-    //    @Size(min = 10, max = 10)
-    private int phone_number;
-
-
-    @NotNull
-    @Size(min = 8, message = "Minimum password length: 8 characters")
+    @Column(name = "PASSWORD")
+    @NotNull(message = "Password cannot be null")
     private String password;
 
+    @Column(name = "FIRST_NAME")
+    @NullOrNotBlank(message = "First name can not be blank")
+    private String firstName;
 
-    //    @Email(regexp = "[0-9a-z]+\\@[0-9a-z]+\\.com\\.br")
-    private String email;
-    //    @Size(min = 10, max = 99)
-    private int age;
-    //    @NotNull
-    private Gender gender;
+    @Column(name = "LAST_NAME")
+    @NullOrNotBlank(message = "Last name can not be blank")
+    private String lastName;
 
-    @Column(name = "enabled")
-    private boolean enabled;
+    @Column(name = "IS_ACTIVE", nullable = false)
+    private Boolean active;
 
-    @Column(name = "last_password_reset_date")
-    private Timestamp lastPasswordResetDate;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "USER_AUTHORITY", joinColumns = {
+            @JoinColumn(name = "USER_ID", referencedColumnName = "USER_ID")}, inverseJoinColumns = {
+            @JoinColumn(name = "ROLE_ID", referencedColumnName = "ROLE_ID")})
+    private Set<Authority> roles = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),//  is the current table
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    // inverse is the second table
-    private List<Authority> authorities;
+    @Column(name = "IS_EMAIL_VERIFIED", nullable = false)
+    private Boolean isEmailVerified;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.authorities;
+    public void addRole(Authority role) {
+        roles.add(role);
+        role.getUserList().add(this);
+    }
+
+    public void addRoles(Set<Authority> roles) {
+        roles.forEach(this::addRole);
     }
 
 
     @Override
-    @JsonIgnore
+//    refers to the permission of the authenticated user.
 
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        System.out.println("GrantedAuthority\n");
+        System.out.println(getRoles()
+                .stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRole().name()))
+                .collect(Collectors.toList()));
+        System.out.println("\nEND OF GrantedAuthority>>>>>>>>>>>>>>");
+
+        return getRoles()
+                .stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRole().name()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
-    @JsonIgnore
-
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
-    @JsonIgnore
-
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
-    @JsonIgnore
     public boolean isEnabled() {
-        return true;
+        return false;
     }
 }

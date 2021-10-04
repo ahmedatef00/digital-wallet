@@ -43,8 +43,6 @@ import static java.lang.String.format;
  */
 
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
-
     @Autowired
     public WebSecurityConfig(JwtTokenFilter jwtTokenFilter, UserRepository userRepository, TokenHelper tokenHelper) {
         this.jwtTokenFilter = jwtTokenFilter;

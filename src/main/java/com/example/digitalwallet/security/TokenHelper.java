@@ -29,11 +29,11 @@ public class TokenHelper {
         return SECRET;
     }
 
-    @Value("${jwt_header}")
+    @Value("${security.jwt_header}")
     private String AUTH_HEADER;
-    @Value("${expires_in}")
+    @Value("${security.expires_in}")
     private int EXPIRES_IN;
-    @Value("${secret}")
+    @Value("${security.secret}")
     public String SECRET;
 
     //    private TimeProvider
